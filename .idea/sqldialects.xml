@@ -3,5 +3,6 @@
   <component name="SqlDialectMappings">
     <file url="file://$USER_HOME$/Desktop/实战项目文件/黑马头条/02-资料/day01-环境搭建、SpringCloud微服务(注册发现、网关)/资料/sql脚本/leadnews_user.sql" dialect="MySQL" />
     <file url="file://$USER_HOME$/Desktop/实战项目文件/黑马头条/02-资料/day02-app端文章查看，静态化freemarker,分布式文件系统minIO/资料/sql脚本/leadnews_article.sql" dialect="MySQL" />
+    <file url="file://$USER_HOME$/Desktop/实战项目文件/黑马头条/02-资料/day03-自媒体文章发布/资料/自媒体sql脚本/leadnews_wemedia.sql" dialect="MySQL" />
   </component>
 </project>

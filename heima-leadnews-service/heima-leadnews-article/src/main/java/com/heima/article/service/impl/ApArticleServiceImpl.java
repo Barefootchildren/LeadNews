@@ -1,18 +1,28 @@
 package com.heima.article.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.heima.article.mapper.ApArticleConfigMapper;
+import com.heima.article.mapper.ApArticleContentMapper;
 import com.heima.article.mapper.ApArticleMapper;
 import com.heima.article.service.ApArticleService;
 import com.heima.common.constants.ArticleConstants;
+import com.heima.model.article.dtos.ArticleDto;
 import com.heima.model.article.dtos.ArticleHomeDto;
 import com.heima.model.article.pojos.ApArticle;
+import com.heima.model.article.pojos.ApArticleConfig;
+import com.heima.model.article.pojos.ApArticleContent;
 import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.common.enums.AppHttpCodeEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.net.nntp.Article;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
@@ -66,4 +76,49 @@ public class ApArticleServiceImpl extends ServiceImpl<ApArticleMapper, ApArticle
                 ResponseResult responseResult = ResponseResult.okResult(apArticles);
                 return responseResult;
     }
+    @Resource
+    ApArticleConfigMapper apArticleConfigMapper;
+    @Resource
+    ApArticleContentMapper apArticleContentMapper;
+    /**
+     * 保存文章信息
+     * @param dto 文章数据传输对象，包含文章的基本信息和内容
+     * @return ResponseResult 响应结果，成功时返回文章ID，失败时返回错误信息
+     */
+    @Override
+    public ResponseResult saveArticle(ArticleDto dto) {
+        // 参数校验
+        if(dto==null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+
+        // 拷贝文章基本信息
+        ApArticle apArticle = new ApArticle();
+        BeanUtils.copyProperties(dto,apArticle);
+
+        // 根据文章ID是否存在判断是新增还是更新操作
+        if(dto.getId()==null){
+            // 新增文章
+            save(apArticle);
+            // 新增文章配置信息
+            ApArticleConfig apArticleConfig = new ApArticleConfig(apArticle.getId());
+            apArticleConfigMapper.insert(apArticleConfig);
+            // 新增文章内容
+            ApArticleContent apArticleContent = new ApArticleContent();
+            apArticleContent.setArticleId(apArticle.getId());
+            apArticleContent.setContent(dto.getContent());
+            apArticleContentMapper.insert(apArticleContent);
+        }else {
+            // 更新文章基本信息
+            updateById(apArticle);
+            // 更新文章内容
+            ApArticleContent apArticleContent = apArticleContentMapper.selectOne(Wrappers.<ApArticleContent>lambdaQuery()
+                    .eq(ApArticleContent::getArticleId, dto.getId()));
+            apArticleContent.setContent(dto.getContent());
+            apArticleContentMapper.updateById(apArticleContent);
+        }
+
+        return ResponseResult.okResult(apArticle.getId());
+    }
+
 }
