@@ -10,3 +10,7 @@ spring:
       config:
         server-addr: 172.18.23.195:8848
         file-extension: yml
+
+tess4j:
+  data-path: C:\Java\WorkSpace\heima-leadnews\otherfiles
+  language: chi_sim

@@ -9,6 +9,7 @@ import com.heima.model.wemedia.pojos.WmMaterial;
 import com.heima.model.wemedia.pojos.WmNewsMaterial;
 import com.heima.wemedia.mapper.WmMaterialMapper;
 import com.heima.wemedia.mapper.WmNewsMaterialMapper;
+import com.heima.wemedia.service.WmNewsAutoScanService;
 import org.springframework.beans.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -96,7 +97,8 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
         pageResponseResult.setData(page.getRecords());
         return pageResponseResult;
     }
-
+    @Autowired
+    private WmNewsAutoScanService wmNewsAutoScanService;
     /**
      * 提交新闻内容
      * @param dto 新闻数据传输对象，包含新闻的标题、内容、图片等信息
@@ -140,6 +142,7 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
 
         // 保存封面相关的素材信息
         saveRelativeInfoForCover(dto,wmNews,materials);
+        wmNewsAutoScanService.autoScanWmNews(wmNews.getId());
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
