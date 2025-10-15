@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.heima.common.constants.WemediaConstants;
+import com.heima.common.constants.WmNewsMessageConstants;
 import com.heima.common.exception.CustomException;
 import com.heima.model.wemedia.pojos.WmMaterial;
 import com.heima.model.wemedia.pojos.WmNewsMaterial;
 import com.heima.wemedia.mapper.WmMaterialMapper;
 import com.heima.wemedia.mapper.WmNewsMaterialMapper;
 import com.heima.wemedia.service.WmNewsAutoScanService;
+import com.heima.wemedia.service.WmNewsTaskService;
 import org.springframework.beans.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -26,20 +28,21 @@ import com.heima.wemedia.mapper.WmNewsMapper;
 import com.heima.wemedia.service.WmNewsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Transactional
 public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> implements WmNewsService {
-        /**
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    /**
      * 查询所有自媒体文章列表
      * @param dto 查询条件封装对象，包含分页信息、状态、频道ID、发布时间范围、关键字等查询条件
      * @return 返回分页查询结果，包含文章列表数据和分页信息
@@ -99,6 +102,8 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
     }
     @Autowired
     private WmNewsAutoScanService wmNewsAutoScanService;
+    @Autowired
+    private WmNewsTaskService wmNewsTaskService;
     /**
      * 提交新闻内容
      * @param dto 新闻数据传输对象，包含新闻的标题、内容、图片等信息
@@ -143,6 +148,33 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
         // 保存封面相关的素材信息
         saveRelativeInfoForCover(dto,wmNews,materials);
         wmNewsAutoScanService.autoScanWmNews(wmNews.getId());
+        // 添加任务
+        wmNewsTaskService.addNewsToTask(wmNews.getId(),wmNews.getPublishTime());
+
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
+
+    @Override
+    public ResponseResult downOrUp(WmNewsDto dto) {
+        if(dto.getId()==null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+        WmNews wmNews = getById(dto.getId());
+        if(wmNews==null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST,"文章不存在");
+        }
+        if(!wmNews.getStatus().equals(WmNews.Status.PUBLISHED.getCode())){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID,"不是发布状态，不能上下架");
+        }
+        if(dto.getEnable()!=null&&dto.getEnable()>-1&&dto.getEnable()<2){
+            update(Wrappers.<WmNews>lambdaUpdate().set(WmNews::getEnable,dto.getEnable()).eq(WmNews::getId,dto.getId()));
+            if(wmNews.getArticleId()!=null){
+                Map<String,Object> map=new HashMap<>();
+                map.put("articleId",wmNews.getArticleId());
+                map.put("enable",wmNews.getEnable());
+                kafkaTemplate.send(WmNewsMessageConstants.WM_NEWS_UP_OR_DOWN_TOPIC,JSON.toJSONString(map));
+            }
+        }
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }

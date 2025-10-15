@@ -6,5 +6,7 @@
     <file url="file://$USER_HOME$/Desktop/实战项目文件/黑马头条/02-资料/day03-自媒体文章发布/资料/自媒体sql脚本/leadnews_wemedia.sql" dialect="MySQL" />
     <file url="file://$USER_HOME$/Desktop/实战项目文件/黑马头条/02-资料/day04-自媒体文章审核/资料/wm_sensitive.sql" dialect="MySQL" />
     <file url="file://$USER_HOME$/Desktop/实战项目文件/黑马头条/02-资料/day05-延迟队列精准发布文章/资料/schedule数据库脚本/leadnews_schedule.sql" dialect="MySQL" />
+    <file url="file://$USER_HOME$/Desktop/实战项目文件/黑马头条/02-资料/day07-app端文章搜索/资料/mongo数据脚本/leadnews-history.sql" dialect="MongoDB" />
+    <file url="file://$USER_HOME$/Desktop/实战项目文件/黑马头条/02-资料/day10-定时计算热点文章，xxl-job/资料/xuxueli0323-xxl-job-2.3.0/xxl-job/doc/db/tables_xxl_job.sql" dialect="MySQL" />
   </component>
 </project>

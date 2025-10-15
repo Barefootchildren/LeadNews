@@ -47,7 +47,7 @@
         <jsoup.version>1.10.2</jsoup.version>
         <jwt.version>0.9.1</jwt.version>
         <fastjson.version>1.2.58</fastjson.version>
-        <fastjson.dataformat.version>2.9.9</fastjson.dataformat.version>
+        <fastjson.dataformat.version>2.9.8</fastjson.dataformat.version>
         <spring.jwt.version>1.0.9.RELEASE</spring.jwt.version>
         <spring.boot.admin.version>2.1.6</spring.boot.admin.version>
         <spring.cloud.version>Hoxton.SR10</spring.cloud.version>
@@ -194,13 +194,18 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency><dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-cbor</artifactId>
+            <version>${fastjson.dataformat.version}</version>
+        </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-cbor</artifactId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
                 <version>${fastjson.dataformat.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-xml</artifactId>
+                <artifactId>jackson-dataformat-smile</artifactId>
                 <version>${fastjson.dataformat.version}</version>
             </dependency>
             <!-- spring colud -->

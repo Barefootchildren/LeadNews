@@ -5,12 +5,16 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.heima.article.mapper.ApArticleContentMapper;
 import com.heima.article.service.ApArticleService;
 import com.heima.article.service.ArticleFreemarkerService;
+import com.heima.common.constants.ArticleConstants;
 import com.heima.file.service.FileStorageService;
 import com.heima.model.article.pojos.ApArticle;
+import com.heima.model.search.vos.SearchArticleVo;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +70,30 @@ public class ArticleFreemarkerServiceImpl implements ArticleFreemarkerService {
             // 更新文章的静态URL路径
             apArticleService.update(Wrappers.<ApArticle>lambdaUpdate().eq(ApArticle::getId,apArticle.getId())
                     .set(ApArticle::getStaticUrl,path));
+            //发送消息，创建索引
+            createArticleESIndex(apArticle,content,path);
         }
     }
+    @Autowired
+    private KafkaTemplate<String,String> kafkaTemplate;
+    /**
+     * 创建文章ES索引
+     * 该方法用于构建文章搜索所需的VO对象，并将其发送到Kafka队列中进行异步索引创建
+     * @param apArticle 文章实体对象，包含文章的基本信息
+     * @param content 文章内容文本
+     * @param path 文章静态页面路径
+     */
+    private void createArticleESIndex(ApArticle apArticle, String content, String path) {
+        // 构造搜索文章VO对象
+        SearchArticleVo searchArticleVo = new SearchArticleVo();
+        // 复制文章基础属性到搜索VO对象
+        BeanUtils.copyProperties(apArticle,searchArticleVo);
+        // 设置文章内容和静态URL路径
+        searchArticleVo.setContent(content);
+        searchArticleVo.setStaticUrl(path);
+        // 发送消息到Kafka，用于ES索引同步
+        kafkaTemplate.send(ArticleConstants.ARTICLE_ES_SYNC_TOPIC, JSONArray.toJSONString(searchArticleVo));
+    }
+
 
 }

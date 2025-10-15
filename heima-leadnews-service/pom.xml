@@ -16,6 +16,8 @@
         <module>heima-leadnews-article</module>
         <module>heima-leadnews-wemedia</module>
         <module>heima-leadnews-schedule</module>
+        <module>heima-leadnews-search</module>
+        <module>heima-leadnews-behavior</module>
     </modules>
 
     <properties>
@@ -25,6 +27,22 @@
 
     <dependencies>
         <!-- 引入依赖模块 -->
+        <!--elasticsearch-->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-client</artifactId>
+            <version>7.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>7.4.0</version>
+        </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>

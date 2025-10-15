@@ -82,7 +82,7 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
             if (!isSensitive)return;
 
 
-            // 文本内容审核
+            /*// 文本内容审核
             boolean isTextScan= handleTextScan((String)textAndImages.get("content"),wmNews);
             if(!isTextScan){
                 return;
@@ -92,7 +92,7 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
             boolean isImagesScan= handleImagesScan((List<String>)textAndImages.get("images"),wmNews);
             if(!isImagesScan){
                 return;
-            }
+            }*/
 
             // 保存到APP端并更新文章状态
             ResponseResult responseResult=saveAppArticle(wmNews);
